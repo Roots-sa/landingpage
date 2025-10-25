@@ -22,11 +22,27 @@ export default function Hero() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-1 sm:space-x-2">
-            <img
-              src="/assets/logo.png"
-              alt="Roots Logo"
-              className="w-8 h-8 sm:w-auto sm:h-auto"
-            />
+            <div className="relative group cursor-pointer overflow-hidden">
+              <img
+                src="/assets/logo.png"
+                alt="Roots Logo"
+                className="w-8 h-8 sm:w-auto sm:h-auto"
+              />
+              <div
+                className="absolute inset-0 w-8 h-8 sm:w-auto sm:h-auto transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300 ease-out origin-bottom"
+                style={{
+                  background: `linear-gradient(to top, #CCFF00 0%, #CCFF00 100%)`,
+                  WebkitMaskImage: "url('/assets/logo.png')",
+                  WebkitMaskSize: "contain",
+                  WebkitMaskRepeat: "no-repeat",
+                  WebkitMaskPosition: "center",
+                  maskImage: "url('/assets/logo.png')",
+                  maskSize: "contain",
+                  maskRepeat: "no-repeat",
+                  maskPosition: "center",
+                }}
+              />
+            </div>
             <div className="flex flex-col -space-y-1">
               <h1 className="text-white font-bold text-2xl sm:text-3xl lg:text-4xl">
                 Roots

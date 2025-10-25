@@ -10,6 +10,11 @@ export const metadata: Metadata = {
   title: "Roots - Innovación desde la raíz",
   description:
     "Transformamos ideas en soluciones que generan impacto. Desarrollamos MVPs funcionales y escalables.",
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
 };
 
 export default function RootLayout({

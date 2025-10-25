@@ -140,7 +140,11 @@ export default function Features() {
               <div
                 key={index}
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-105 transition-all duration-300 flex flex-col w-full sm:w-80 md:w-96 lg:w-96 xl:w-96"
-                style={{ maxWidth: "376.26px", height: "480.76px" }}
+                style={{
+                  maxWidth: "376.26px",
+                  height: "480.76px",
+                  width: "376.26px",
+                }}
               >
                 {/* Header negro con icono y título */}
                 <div className="bg-black p-6 flex items-center space-x-4">

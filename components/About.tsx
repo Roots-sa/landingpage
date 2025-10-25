@@ -104,6 +104,33 @@ export default function About() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Auto-scroll carousel
+  useEffect(() => {
+    if (!carouselRef.current || isDragging) return;
+
+    const autoScroll = setInterval(() => {
+      if (carouselRef.current) {
+        const cardWidth = 320; // Approximate width of each card including gap
+        const maxScroll =
+          carouselRef.current.scrollWidth - carouselRef.current.clientWidth;
+        const currentScroll = carouselRef.current.scrollLeft;
+
+        // If we're at the end, reset to beginning
+        if (currentScroll >= maxScroll - 50) {
+          carouselRef.current.scrollTo({ left: 0, behavior: "smooth" });
+        } else {
+          // Move to next card
+          carouselRef.current.scrollTo({
+            left: currentScroll + cardWidth,
+            behavior: "smooth",
+          });
+        }
+      }
+    }, 3000); // Move every 3 seconds
+
+    return () => clearInterval(autoScroll);
+  }, [isDragging]);
+
   return (
     <section id="about" className="section-padding bg-black">
       <div className="max-w-7xl mx-auto">
@@ -115,25 +142,25 @@ export default function About() {
               ¿Por qué elegirnos?
             </h2>
 
-            <div className="w-16 sm:w-32 lg:w-48 xl:w-80 h-1 bg-white mb-6 sm:mb-8"></div>
+            <div className="w-2/3 sm:w-1/3 lg:w-2/3 xl:w-2/3 h-0.5 bg-white mb-6 sm:mb-8"></div>
 
             <div className="space-y-4 sm:space-y-6 text-white leading-relaxed text-lg sm:text-xl lg:text-2xl">
               <p>
                 Cuando las ideas se quedan en papel o los proyectos se frenan
                 por falta de tiempo o equipo, ahí{" "}
-                <span className="bg-lime-400 text-black px-2 py-1 rounded font-semibold">
+                <span className="bg-[#CCFF00] text-black px-2 py-1  font-semibold">
                   entra Roots.
                 </span>
               </p>
 
               <p>
                 Nos enfocamos en{" "}
-                <span className="bg-lime-400 text-black px-2 py-1 rounded font-semibold">
+                <span className="bg-[#CCFF00] text-black px-2 py-1  font-semibold">
                   convertir tu idea en un producto digital real, funcional y
                   escalable
                 </span>
                 . Porque entendemos que{" "}
-                <span className="bg-lime-400 text-black px-2 py-1 rounded font-semibold">
+                <span className="bg-[#CCFF00] text-black px-2 py-1  font-semibold">
                   cada proyecto necesita raíces sólidas para crecer
                 </span>
                 .
