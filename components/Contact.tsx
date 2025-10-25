@@ -50,11 +50,11 @@ export default function Contact() {
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
-        error.errors.forEach((err) => {
+        for (const err of error.issues) {
           if (err.path[0]) {
             fieldErrors[err.path[0] as string] = err.message;
           }
-        });
+        }
         setErrors(fieldErrors);
         return;
       }

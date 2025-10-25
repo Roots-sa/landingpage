@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import nodemailer from 'nodemailer'
+import sgMail from '@sendgrid/mail'
+
+// Configurar SendGrid
+sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
 export async function POST(request: NextRequest) {
     try {
@@ -12,16 +15,14 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Configuración del transporter (usando valores dummy para desarrollo)
-        const transporter = nodemailer.createTransporter({
-            host: 'smtp.gmail.com',
-            port: 587,
-            secure: false,
-            auth: {
-                user: process.env.EMAIL_USER || 'test@example.com',
-                pass: process.env.EMAIL_PASS || 'test-password'
-            }
-        })
+        // Verificar que la API key esté configurada
+        if (!process.env.SENDGRID_API_KEY) {
+            console.error('SENDGRID_API_KEY no está configurada')
+            return NextResponse.json(
+                { error: 'Error de configuración del servidor' },
+                { status: 500 }
+            )
+        }
 
         // Formatear el historial del chat
         const chatHistory = messages.map((msg: any) => {
@@ -30,8 +31,12 @@ export async function POST(request: NextRequest) {
             return `[${time}] ${sender}: ${msg.text}`
         }).join('\n')
 
-        // Contenido del email
-        const emailContent = `
+        // Configurar el email con SendGrid
+        const msg = {
+            to: process.env.ADMIN_EMAIL || 'admin@roots.com',
+            from: process.env.SENDGRID_FROM_EMAIL || 'noreply@roots.com',
+            subject: `Nueva conversación de chatbot - ${userData.name || 'Usuario'} (${new Date().toLocaleDateString('es-ES')})`,
+            text: `
 Resumen de Conversación - Chatbot Roots
 =====================================
 
@@ -46,41 +51,46 @@ ${chatHistory}
 ---
 Este email fue generado automáticamente por el chatbot de Roots.
 Para más información, visita nuestro sitio web.
-    `
-
-        // Configurar el email
-        const mailOptions = {
-            from: process.env.EMAIL_USER || 'test@example.com',
-            to: process.env.ADMIN_EMAIL || 'admin@roots.com',
-            subject: `Nueva conversación de chatbot - ${userData.name || 'Usuario'} (${new Date().toLocaleDateString('es-ES')})`,
-            text: emailContent,
+            `,
             html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #2563eb;">Resumen de Conversación - Chatbot Roots</h2>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <div style="background: linear-gradient(135deg, #CCFF00 0%, #B8E600 100%); padding: 20px; border-radius: 8px 8px 0 0;">
+            <h2 style="color: #000000; margin: 0; font-size: 24px; font-weight: bold;">
+              🤖 Resumen de Conversación - Chatbot Roots
+            </h2>
+          </div>
           
-          <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #374151; margin-top: 0;">Datos del Usuario:</h3>
-            <p><strong>Nombre:</strong> ${userData.name || 'No proporcionado'}</p>
-            <p><strong>Email:</strong> ${userData.email || 'No proporcionado'}</p>
-            <p><strong>Fecha:</strong> ${new Date(timestamp).toLocaleString('es-ES')}</p>
+          <div style="padding: 20px;">
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #CCFF00;">
+              <h3 style="color: #374151; margin-top: 0; font-size: 18px;">👤 Datos del Usuario:</h3>
+              <p style="margin: 8px 0; font-size: 16px;"><strong>Nombre:</strong> ${userData.name || 'No proporcionado'}</p>
+              <p style="margin: 8px 0; font-size: 16px;"><strong>Email:</strong> <a href="mailto:${userData.email || 'no-email'}" style="color: #CCFF00; text-decoration: none;">${userData.email || 'No proporcionado'}</a></p>
+              <p style="margin: 8px 0; font-size: 16px;"><strong>Fecha:</strong> ${new Date(timestamp).toLocaleString('es-ES')}</p>
+            </div>
+
+            <div style="background-color: #ffffff; border: 2px solid #e5e7eb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #374151; margin-top: 0; font-size: 18px;">💬 Historial de la Conversación:</h3>
+              <div style="background-color: #f9fafb; padding: 15px; border-radius: 6px; border-left: 3px solid #CCFF00; font-family: monospace; white-space: pre-line; font-size: 14px; line-height: 1.6;">${chatHistory}</div>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="mailto:${userData.email || 'admin@roots.com'}" style="background-color: #CCFF00; color: #000000; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+                📧 Responder a ${userData.name || 'Usuario'}
+              </a>
+            </div>
           </div>
 
-          <div style="background-color: #ffffff; border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px;">
-            <h3 style="color: #374151; margin-top: 0;">Historial de la Conversación:</h3>
-            <div style="background-color: #f9fafb; padding: 10px; border-radius: 4px; font-family: monospace; white-space: pre-line;">${chatHistory}</div>
+          <div style="background-color: #f3f4f6; padding: 15px; border-radius: 0 0 8px 8px; text-align: center;">
+            <p style="color: #6b7280; font-size: 12px; margin: 0;">
+              🤖 Este email fue generado automáticamente por el chatbot de Roots.
+            </p>
           </div>
-
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
-          <p style="color: #6b7280; font-size: 12px; text-align: center;">
-            Este email fue generado automáticamente por el chatbot de Roots.<br>
-            Para más información, visita nuestro sitio web.
-          </p>
         </div>
-      `
+            `
         }
 
-        // Enviar el email
-        await transporter.sendMail(mailOptions)
+        // Enviar el email con SendGrid
+        await sgMail.send(msg)
 
         return NextResponse.json({
             success: true,
